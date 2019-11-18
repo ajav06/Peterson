@@ -2,8 +2,8 @@
 <html class="has-navbar-fixed-top has-background-grey-lighter is-family-sans-serif">
 
 <head>
-    <title>Algoritmo de Peterson</title>
-    <link rel="stylesheet" href="assets/css/bulma.css">
+    <title>{% block title %}{% endblock title %}</title>
+    <link rel="stylesheet" href="{{ url_for("static", filename="bulma.css") }}">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -12,7 +12,7 @@
     <nav class="navbar is-danger is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <a href="#" class="navbar-item is-font-primary">
-                <img src="assets/images/logo.png">
+                <img src="{{ url_for("static", filename="logo.png") }}">
             </a>
         </div>
         <div class="navbar-menu">
@@ -28,13 +28,12 @@
     </nav>
     <section class="section">
         <div class="body">
-            <button class="button is-primary" onclick="javascript:peterson();">
-                Correr Peterson
-            </button>
+            {% block content %}{% endblock content %}
         </div>
     </section>
 
-    <script src="assets/js/peterson.js" type="application/javascript"></script>
+    <script src="{{ url_for("static", filename="jquery-3.4.1.min.js") }}" type="application/javascript"></script>
+    <script src="{{ url_for("static", filename="peterson.js") }}" type="application/javascript"></script>
 </body>
 
 </html>
