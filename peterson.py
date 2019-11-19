@@ -6,19 +6,22 @@ class Peterson():
     cancelar = False
     proceso1_desea_entrar = False
     proceso2_desea_entrar = False
+    proceso1_seccion_critica = False
+    proceso2_seccion_critica = False
     proceso_favorecido = 2
 
     def seccion_critica_1(self):
-        print('\nComenzó sección crítica proceso 1.')
-        time.sleep(2)
+        self.proceso1_seccion_critica = True
         print('\nTerminó sección crítica proceso 1.')
+        self.proceso1_seccion_critica = False
 
     def seccion_critica_2(self):
-        print('\nComenzó sección crítica proceso 2.')
-        time.sleep(2)
+        self.proceso2_seccion_critica = True
         print('\nTerminó sección crítica proceso 2.')
+        self.proceso2_seccion_critica = False
 
     def proceso1(self):
+        time.sleep(1)
         while not self.cancelar:
             self.proceso1_desea_entrar = True
             self.proceso_favorecido = 2
@@ -27,7 +30,7 @@ class Peterson():
                 pass
 
             if self.cancelar:
-                return
+                break
             
             self.seccion_critica_1()
 
@@ -36,6 +39,7 @@ class Peterson():
         print('\nCerrando el proceso 1.')
 
     def proceso2(self):
+        time.sleep(1)
         while not self.cancelar:
             self.proceso_2_desea_entrar = True
             self.proceso_favorecido = 1
@@ -59,10 +63,6 @@ class Peterson():
         t1.start()
         t2.start()
 
-        time.sleep(20)
-
-        self.cancelar = True
-
-if __name__ == "__main__":
-    p = Peterson()
-    p.main()
+# if __name__ == "__main__":
+#     p = Peterson()
+#     p.main()
