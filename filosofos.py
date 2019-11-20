@@ -1,64 +1,73 @@
+from flask import Flask
+from flask_socketio import SocketIO, send
+
 import time
 import random
 import threading
 import sys
 
-N = 5
-TIEMPO_TOTAL = 2
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
+
+TIEMPO_TOTAL = 3
 
 
-class filosofo(threading.Thread):
+class Filosofo(threading.Thread):
     semaforo = threading.Lock()  # SEMAFORO BINARIO ASEGURA LA EXCLUSION MUTUA
     estado = []  # PARA CONOCER EL ESTADO DE CADA FILOSOFO
     tenedores = []  # ARRAY DE SEMAFOROS PARA SINCRONIZAR ENTRE FILOSOFOS, MUESTRA QUIEN ESTA EN COLA DEL TENEDOR
     count = 0
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()  # HERENCIA
-        self.id = filosofo.count  # DESIGNA EL ID AL FILOSOFO
-        filosofo.count += 1  # AGREGA UNO A LA CANT DE FILOSOFOS
+        self.nro = kwargs.get('nro', 5)  # NUMERO DE COMENSALES
+        self.id = Filosofo.count  # DESIGNA EL ID AL FILOSOFO
+        Filosofo.count += 1  # AGREGA UNO A LA CANT DE FILOSOFOS
         # EL FILOSOFO ENTRA A LA MESA EN ESTADO PENSANDO
-        filosofo.estado.append('PENSANDO')
+        Filosofo.estado.append('PENSANDO')
         # AGREGA EL SEMAFORO DE SU TENEDOR( TENEDOR A LA IZQUIERDA)
-        filosofo.tenedores.append(threading.Semaphore(0))
+        Filosofo.tenedores.append(threading.Semaphore(0))
         print("FILOSOFO {0} - PENSANDO".format(self.id))
 
     def __del__(self):
         # NECESARIO PARA SABER CUANDO TERMINA EL THREAD
         print("FILOSOFO {0} - Se para de la mesa".format(self.id))
 
+    @socketio.on('message')
     def pensar(self):
         # CADA FILOSOFO SE TOMA DISTINTO TIEMPO PARA PENSAR, ALEATORIO
         time.sleep(random.randint(0, 5))
+        return send(Filosofo.estado[self.id])
 
     def derecha(self, i):
-        return (i-1) % N  # BUSCAMOS EL INDICE DE LA DERECHA
+        return (i+1) % self.nro  # BUSCAMOS EL INDICE DE LA DERECHA
 
     def izquierda(self, i):
-        return(i+N-1) % N  # BUSCAMOS EL INDICE DE LA IZQUIERDA
+        return(i+self.nro-1) % self.nro  # BUSCAMOS EL INDICE DE LA IZQUIERDA
 
     def verificar(self, i):
-        if filosofo.estado[i] == 'HAMBRIENTO' and filosofo.estado[self.izquierda(i)] != 'COMIENDO' and filosofo.estado[self.derecha(i)] != 'COMIENDO':
-            filosofo.estado[i] = 'COMIENDO'
+        if Filosofo.estado[i] == 'HAMBRIENTO' and Filosofo.estado[self.izquierda(i)] != 'COMIENDO' and Filosofo.estado[self.derecha(i)] != 'COMIENDO':
+            Filosofo.estado[i] = 'COMIENDO'
             # SI SUS VECINOS NO ESTAN COMIENDO AUMENTA EL SEMAFORO DEL TENEDOR Y CAMBIA SU ESTADO A COMIENDO
-            filosofo.tenedores[i].release()
+            Filosofo.tenedores[i].release()
 
     def tomar(self):
-        filosofo.semaforo.acquire()  # SEÑALA QUE TOMARA LOS TENEDORES (EXCLUSION MUTUA)
-        filosofo.estado[self.id] = 'HAMBRIENTO'
+        Filosofo.semaforo.acquire()  # SEÑALA QUE TOMARA LOS TENEDORES (EXCLUSION MUTUA)
+        Filosofo.estado[self.id] = 'HAMBRIENTO'
         # VERIFICA SUS VECINOS, SI NO PUEDE COMER NO SE BLOQUEARA EN EL SIGUIENTE ACQUIRE
         self.verificar(self.id)
         # SEÑALA QUE YA DEJO DE INTENTAR TOMAR LOS TENEDORES (CAMBIAR EL ARRAY ESTADO)
-        filosofo.semaforo.release()
+        Filosofo.semaforo.release()
         # SOLO SI PODIA TOMARLOS SE BLOQUEARA CON ESTADO COMIENDO
-        filosofo.tenedores[self.id].acquire()
+        Filosofo.tenedores[self.id].acquire()
 
     def soltar(self):
-        filosofo.semaforo.acquire()  # SEÑALA QUE SOLTARA LOS TENEDORES
-        filosofo.estado[self.id] = 'PENSANDO'
+        Filosofo.semaforo.acquire()  # SEÑALA QUE SOLTARA LOS TENEDORES
+        Filosofo.estado[self.id] = 'PENSANDO'
         self.verificar(self.izquierda(self.id))
         self.verificar(self.derecha(self.id))
-        filosofo.semaforo.release()  # YA TERMINO DE MANIPULAR TENEDORES
+        Filosofo.semaforo.release()  # YA TERMINO DE MANIPULAR TENEDORES
 
     def comer(self):
         print("FILOSOFO {} COMIENDO".format(self.id))
@@ -73,10 +82,10 @@ class filosofo(threading.Thread):
             self.soltar()  # SUELTA LOS TENEDORES
 
 
-def main():
+def main(N):
     lista = []
     for i in range(N):
-        lista.append(filosofo())  # AGREGA UN FILOSOFO A LA LISTA
+        lista.append(Filosofo(nro=N))  # AGREGA UN FILOSOFO A LA LISTA
 
     for f in lista:
         f.start()  # ES EQUIVALENTE A RUN()
@@ -86,4 +95,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(5)

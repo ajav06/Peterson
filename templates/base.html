@@ -11,7 +11,7 @@
 <body>
     <nav class="navbar is-danger is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a href="#" class="navbar-item is-font-primary">
+            <a href="/" class="navbar-item is-font-primary">
                 <img src="{{ url_for("static", filename="logo.png") }}">
             </a>
         </div>
@@ -20,7 +20,7 @@
                 <a href="algoritmo.html" class="navbar-item is-active">
                     Algoritmo
                 </a>
-                <a href="problema.html" class="navbar-item">
+                <a href="/filosofos" class="navbar-item">
                     Problema
                 </a>
             </div>
@@ -33,8 +33,14 @@
     </section>
 
     <script src="{{ url_for("static", filename="jquery-3.4.1.min.js") }}" type="application/javascript"></script>
+    <script src="{{ url_for("static", filename="socket.io.js") }}" type="application/javascript"></script>
     <script src="{{ url_for("static", filename="peterson.js") }}" type="application/javascript"></script>
     <script src="{{ url_for("static", filename="_.js") }}" type="application/javascript"></script>
+
+    {% block script %}
+    
+    {% endblock script %}
+
 </body>
 
 </html>
