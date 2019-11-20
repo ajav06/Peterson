@@ -1,3 +1,4 @@
+from filosofos import Filosofo, main
 from flask import Flask, render_template, jsonify, request
 from peterson import Peterson
 import threading
@@ -42,3 +43,6 @@ def peterson():
 @app.route('/check_chofer')
 def chequeo():
     return jsonify("proceso_critico",p.p_f)
+
+if __name__ == "__main__":
+    app.run()
