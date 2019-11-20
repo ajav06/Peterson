@@ -5,6 +5,7 @@ from filosofos import Filosofo, main, app, socketio
 from peterson import Peterson
 
 import threading
+import time
 
 critico_1 = True
 critico_2 = False
@@ -47,18 +48,26 @@ def peterson():
 
 @app.route('/check_chofer')
 def chequeo():
-    return jsonify("proceso_critico", p.p_f)
+    return jsonify(proceso_critico=p.p_f)
 
 
 @app.route('/filosofos')
 def filosofos():
-    main(5)
     return render_template("problema.html")
+
+@app.route('/_filosofos')
+def ajax_filosofos():
+    t = threading.Thread(target=main(5))
+    t.start()
+    return jsonify(exito=True)
 
 # @socketio.on('message')
 # def handleMessage(msg):
 #     msg = 'PENSANDO'
 #     return send(msg, broadcast=True)
 
-if __name__ == '__main__':
-    socketio.run(app)
+def iniciar_flask():
+    if __name__ == '__main__':
+        socketio.run(app)
+        
+iniciar_flask()

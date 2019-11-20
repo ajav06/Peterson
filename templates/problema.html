@@ -21,11 +21,11 @@
 
 {% block script %}
     <script>
-        const socket = io();
+        var socket = io();
 
-        socket.on('message', function (msg) {
-            $('#messages').append('<li>' + msg + ' </li>')
-            console.log(msg)
+        socket.on('update', function (data) {
+            $('#messages').append('<li>' + data.estado + ' </li>')
+            console.log(data.estado)
         });
     </script>
 {% endblock script %}

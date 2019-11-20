@@ -1,17 +1,17 @@
-from flask import Flask
-from flask_socketio import SocketIO, send
-
+from gevent import monkey
+monkey.patch_all()
 import time
 import random
 import threading
 import sys
+from flask import Flask, render_template, jsonify, request
+from flask_socketio import SocketIO, send
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
-TIEMPO_TOTAL = 3
-
+TIEMPO_TOTAL = 1
 
 class Filosofo(threading.Thread):
     semaforo = threading.Lock()  # SEMAFORO BINARIO ASEGURA LA EXCLUSION MUTUA
@@ -28,17 +28,20 @@ class Filosofo(threading.Thread):
         Filosofo.estado.append('PENSANDO')
         # AGREGA EL SEMAFORO DE SU TENEDOR( TENEDOR A LA IZQUIERDA)
         Filosofo.tenedores.append(threading.Semaphore(0))
+        socketio.emit('update',{"estado":"FILOSOFO {0} - PENSANDO".format(self.id)}, broadcast=True)
         print("FILOSOFO {0} - PENSANDO".format(self.id))
+        socketio.sleep(1)
 
     def __del__(self):
         # NECESARIO PARA SABER CUANDO TERMINA EL THREAD
+        socketio.emit('update',{"estado":"FILOSOFO {0} - Se para de la mesa".format(self.id)}, broadcast=True)
+        socketio.sleep(1)
         print("FILOSOFO {0} - Se para de la mesa".format(self.id))
 
-    @socketio.on('message')
     def pensar(self):
         # CADA FILOSOFO SE TOMA DISTINTO TIEMPO PARA PENSAR, ALEATORIO
-        time.sleep(random.randint(0, 5))
-        return send(Filosofo.estado[self.id])
+        time.sleep(random.randint(0,5))
+        return Filosofo.estado[self.id]
 
     def derecha(self, i):
         return (i+1) % self.nro  # BUSCAMOS EL INDICE DE LA DERECHA
@@ -70,8 +73,12 @@ class Filosofo(threading.Thread):
         Filosofo.semaforo.release()  # YA TERMINO DE MANIPULAR TENEDORES
 
     def comer(self):
+        socketio.emit('update',{"estado":"FILOSOFO {} COMIENDO".format(self.id)}, broadcast=True)
+        socketio.sleep(1)
         print("FILOSOFO {} COMIENDO".format(self.id))
         time.sleep(random.randint(1, 3))  # TIEMPO ARBITRARIO PARA COMER
+        socketio.emit('update',{"estado":"FILOSOFO {} TERMINO DE COMER".format(self.id)}, broadcast=True)
+        socketio.sleep(1)
         print("FILOSOFO {} TERMINO DE COMER".format(self.id))
 
     def run(self):
@@ -80,7 +87,6 @@ class Filosofo(threading.Thread):
             self.tomar()  # AGARRA LOS TENEDORES CORRESPONDIENTES
             self.comer()  # COME
             self.soltar()  # SUELTA LOS TENEDORES
-
 
 def main(N):
     lista = []
@@ -93,6 +99,8 @@ def main(N):
     for f in lista:
         f.join()  # BLOQUEA HASTA QUE TERMINA EL THREAD
 
-
-if __name__ == "__main__":
-    main(5)
+def iniciar_flask():
+    if __name__ == '__main__':
+        socketio.run(app, threaded=True)
+        
+iniciar_flask()
