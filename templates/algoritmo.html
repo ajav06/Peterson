@@ -3,9 +3,24 @@
 {% block title %}Algoritmo de Peterson{% endblock title %}
 
 {% block content %}
-<div class="box has-text-centered">
-    <p id="critica" class="has-text-centered">
-        No ha comenzado Peterson.
+<div class="box has-text-centered" id="encabezado">
+    <p class="has-text-centered">
+        <div class="title">
+            Algoritmo de Peterson para la Exclusión Mutua
+        </div>
+        <div class="subtitle">
+            Programado con Python, utilizando el framework Flask, Javascript y consultas AJAX.
+        </div>
+        El algoritmo se ejecuta en el lado del servidor, con consultas AJAX para poder determinar el estado actual de
+        los procesos y mostrarlos gráficamente aquí.
+    </p>
+    <button class="button is-danger" onclick="peterson();" style="margin-top:10px">
+        Comenzar
+    </button>
+</div>
+<div id="caja" class="box has-text-centered" style="display:none">
+    <p id="algoritmo" class="has-text-centered">
     </p>
 </div>
+
 {% endblock content %}

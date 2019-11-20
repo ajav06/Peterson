@@ -5,7 +5,7 @@ app = Flask(__name__)
 critico_1 = True
 critico_2 = False
 primera_vez = False
-p = None
+p = Peterson()
 
 @app.route('/')
 def index():
@@ -19,7 +19,6 @@ def peterson():
         if request.method == 'GET':
             global critico_1, critico_2, primera_vez, p
             if not primera_vez:
-                p = Peterson()
                 t = threading.Thread(target=p.main())
                 t.start()
                 primera_vez = True
@@ -39,3 +38,7 @@ def peterson():
                         critico_2 = False
                         return jsonify(critico = 2)
     return jsonify(respuesta="ola")
+
+@app.route('/check_chofer')
+def chequeo():
+    return jsonify("proceso_critico",p.p_f)
