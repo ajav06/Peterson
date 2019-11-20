@@ -1,9 +1,16 @@
+from flask import Flask
+from flask_socketio import SocketIO, send
+
 import time
 import random
 import threading
 import sys
 
-TIEMPO_TOTAL = 2
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
+
+TIEMPO_TOTAL = 3
 
 
 class Filosofo(threading.Thread):
@@ -27,9 +34,11 @@ class Filosofo(threading.Thread):
         # NECESARIO PARA SABER CUANDO TERMINA EL THREAD
         print("FILOSOFO {0} - Se para de la mesa".format(self.id))
 
+    @socketio.on('message')
     def pensar(self):
         # CADA FILOSOFO SE TOMA DISTINTO TIEMPO PARA PENSAR, ALEATORIO
         time.sleep(random.randint(0, 5))
+        return send(Filosofo.estado[self.id])
 
     def derecha(self, i):
         return (i+1) % self.nro  # BUSCAMOS EL INDICE DE LA DERECHA

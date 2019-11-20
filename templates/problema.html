@@ -1,34 +1,31 @@
-<!DOCTYPE html>
-<html class="has-navbar-fixed-top has-background-grey-lighter is-family-sans-serif">
+{% extends "base.html" %}
 
-<head>
-    <title>Algoritmo de Peterson</title>
-    <link rel="stylesheet" href="assets/css/bulma.css">
-</head>
+{% block title %}Algoritmo de Peterson{% endblock title %}
 
-<body>
-    <nav class="navbar is-danger is-fixed-top" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a href="#" class="navbar-item is-font-primary">
-                <img src="assets/images/logo.png">
-            </a>
-        </div>
-        <div class="navbar-menu">
-            <div class="navbar-start">
-                <a href="algoritmo.html" class="navbar-item">
-                    Algoritmo
-                </a>
-                <a href="problema.html" class="navbar-item is-active">
-                    Problema
-                </a>
-            </div>
-        </div>
-    </nav>
-    <section class="section">
-        <div class="body">
-            Hola
-        </div>
-    </section>
-</body>
+{% block content %}
 
-</html>
+<div class="box has-text-centered" id="encabezado">
+    <p class="has-text-centered">
+        <div class="title">
+            Algoritmo de Filosofos Comelones
+        </div>
+        <div class="subtitle">
+            Programado con Python, utilizando el framework Flask, Javascript y consultas AJAX.
+        </div>
+        <ul id="messages"></ul>
+        
+    </p>
+</div>
+
+{% endblock content %}
+
+{% block script %}
+    <script>
+        const socket = io();
+
+        socket.on('message', function (msg) {
+            $('#messages').append('<li>' + msg + ' </li>')
+            console.log(msg)
+        });
+    </script>
+{% endblock script %}
