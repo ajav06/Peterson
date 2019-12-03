@@ -1,5 +1,5 @@
 # Peterson
-Proyecto donde se implementación del algoritmo de Peterson; solución al problema de los filósofos comelones, con interfaz grafica desplegada en un sistema web - Proyecto de Sistema Operativo.
+Proyecto donde se implementación del algoritmo de Peterson; solución al problema de los filósofos comelones, con interfaz gráfica desplegada en un sistema web - Proyecto de Sistema Operativo.
 
 ## Back-End:
 * Flask (Python) - Ajax y SocketIO.
